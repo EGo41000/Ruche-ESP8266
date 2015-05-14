@@ -11,9 +11,10 @@
 
 #define useWifi 1
 
-const char* network[2] = {"XXX", "YYY"};
+//const char* network[2] = {"XXX", "YYY"};
+extern const char* network[2];
+extern const char* host;
 
-const char* host = "192.168.0.10";
 const char* streamId   = "ruche2";
 const char* privateKey = "FablabRH";
 const char path[] = "/test/log.php";
@@ -94,6 +95,7 @@ void setup() {
   Serial.print("Connecting to ");
   Serial.println(network[0]);
 
+  WiFi.mode(WIFI_STA); // Only Station mode
   WiFi.begin(network[0], network[1]);
   
   while (WiFi.status() != WL_CONNECTED && (n++ < 10)) {
@@ -105,14 +107,20 @@ void setup() {
   Serial.println("WiFi connected");  
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+  
+  WiFi.printDiag(Serial);
+  
 #endif
 }
 
-int value = 0;
+unsigned long t, t1=-999999; //millis();
 
 void loop() {
-  delay(5000);
-  ++value;
+  t = millis();
+  if (t-t1 < 5*60*1000) {
+    return;
+    }
+  t1 = t;
 
   ds.reset();
   ds.write(0xCC);        // skip ROM
@@ -133,8 +141,6 @@ void loop() {
   url += streamId;
   url += "?private_key=";
   url += privateKey;
-  //url += "&value=";
-  //url += value;
   url += "&T1=";
   url += T1;
   url += "&T2=";
